@@ -1,5 +1,4 @@
 import matplotlib.pyplot as plt
-from skimage.color import rgb2hsv
 import helperFunctions
 import matplotlib.image as mpimg
 import numpy as np
