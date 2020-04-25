@@ -58,6 +58,7 @@ def non_maxima(img, theta):
 def double_threshold(img, low, high):
     for i in range(img.shape[0]):
         for j in range(img.shape[1]):
+
             if img[i, j] < low:
                 img[i, j] = 0
             elif img[i, j] < high:
@@ -80,3 +81,29 @@ def hysteresis_edge_tracking(img):
             else:
                 img[i,j] = 0
     return img
+def select_white(image):
+    # white color mask
+    lower = np.uint8([120  , 0,   190])
+    upper = np.uint8([255, 255, 255])
+
+    white_mask = inRange(image, lower, upper)
+    # yellow color mask
+    lower = np.uint8([0,0,0])
+    upper = np.uint8([255, 255,255])
+    yellow_mask = inRange(image, lower, upper)
+
+
+    return (white_mask,yellow_mask)
+def inRange(image, lower, upper):
+
+
+    newImage = np.zeros(image.shape )
+    for i in range(image.shape[0]):
+        for j in range(image.shape[1]):
+            temp =image[i,j]
+            if (temp[0]>=lower[0] and temp[0]<=upper[0] )and( temp[1]>=lower[1] and temp[1]<=upper[1]) and(temp[2]>=lower[2]  and temp[2]<=upper[2]):
+                newImage[i,j]=[255,255,255]
+
+    return newImage
+
+
