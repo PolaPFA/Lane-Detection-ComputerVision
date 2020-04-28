@@ -26,8 +26,8 @@ def convert_rbg_to_grayscale(img):
     
 def convert_rgb_to_hsv(img):
     r_dash = img[:,:,0]/255
-    g_dash = img[:,:,1]/255
-    b_dash = img[:,:,2]/255
+    g_dash = img[:,:,2]/255
+    b_dash = img[:,:,1]/255
     out_image = np.zeros([img.shape[0], img.shape[1], 3])
     c_max = np.max([r_dash, g_dash, b_dash], axis=0)
     c_min = np.min([r_dash, g_dash, b_dash], axis=0)
