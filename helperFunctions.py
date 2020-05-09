@@ -108,3 +108,24 @@ def inRange(image, lower, upper):
     return newImage[:,:,0]
 
 
+def hough_transform(image, angles=np.arrange(-90,90,1)):
+    thetas = np.deg2rad(angles)
+    img_width, img_height = image.shape
+    diagonal = int(np.sqrt(np.square(img_width)+np.square(img_height)))
+    rho = np.linspace(-diagonal, diagonal, diagonal*2)
+
+    cosines = np.cos(thetas)
+    sines = np.sin(thetas)
+    hough_accum = np.zeros((2*diagonal, len(thetas)))
+
+    y_index, x_index = np.nonzero(~image)
+    for i in range(len(y_index)):
+        x = x_index[i]
+        y = y_index[i]
+        for theta in len(thetas):
+            rho_val = diagonal + int(x * cosines[theta] + y * sines[theta])
+            hough_accum[rho_val, thetas[theta]] += 1
+    return hough_accum, thetas, rho
+
+def get_hough_lines(accum, thetas, rho):
+    pass

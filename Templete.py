@@ -81,11 +81,12 @@ def mask_image(img, vertices):
 
 # 1 read the image
 image = plt.imread('test1.jpg')
-
+print('Original Image')
 plt.imshow(image)
 plt.show()
 # 2 convert to HSV
 hsv_image = convert_rgb_to_hsv(image)
+print('HSV Image')
 plt.imshow(hsv_image)
 plt.show()
 # 3 convert to Gray
@@ -94,12 +95,15 @@ gray_image = convert_rbg_to_grayscale(image)
 #plt.show()
 # 4 Threshold HSV for Yellow and White (combine the two results together)
 (white,yellow)= helperFunctions.select_white(image)
+print('White Image')
 plt.imshow(white)
 plt.show()
+print('Yellow Image')
 plt.imshow(yellow)
 plt.show()
 # 5 Mask the gray image using the threshold output fro step 4
 newgray=(gray_image*white)+(gray_image*yellow)
+print('Masked Image')
 plt.imshow(newgray)
 plt.show()
 # 6 Apply noise remove (gaussian) to the masked gray image
