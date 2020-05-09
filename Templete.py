@@ -80,7 +80,7 @@ def mask_image(img, vertices):
 # main part
 
 # 1 read the image
-image = plt.imread('test.jpg')
+image = plt.imread('test1.jpg')
 
 plt.imshow(image)
 plt.show()
