@@ -83,12 +83,12 @@ def mask_image(img, vertices):
 image = plt.imread('test1.jpg')
 print('Original Image')
 plt.imshow(image)
-plt.show()
+#plt.show()
 # 2 convert to HSV
 hsv_image = convert_rgb_to_hsv(image)
 print('HSV Image')
 plt.imshow(hsv_image)
-plt.show()
+#plt.show()
 # 3 convert to Gray
 gray_image = convert_rbg_to_grayscale(image)
 #plt.imshow(gray_image)
@@ -97,14 +97,28 @@ gray_image = convert_rbg_to_grayscale(image)
 (white,yellow)= helperFunctions.select_white(image)
 print('White Image')
 plt.imshow(white)
-plt.show()
+#plt.show()
 print('Yellow Image')
 plt.imshow(yellow)
-plt.show()
+#plt.show()
 # 5 Mask the gray image using the threshold output fro step 4
 newgray=(gray_image*white)+(gray_image*yellow)
+
 print('Masked Image')
 plt.imshow(newgray)
+#plt.show()
+
+print('Hough Image')
+hough_image = yellow+white
+hough_accum, thetas, rho = helperFunctions.hough_transform(hough_image)
+lines = helperFunctions.get_hough_lines(hough_accum, thetas, rho)
+#print(lines)
+#print('Done')
+plt.imshow(image)
+for line in lines:
+    l1 = line[0]
+    l2 = line[1]
+    plt.plot([l1[0],l2[0]], [l2[1],l2[1]])
 plt.show()
 # 6 Apply noise remove (gaussian) to the masked gray image
 # 7 use canny detector and fine tune the thresholds (low and high values)

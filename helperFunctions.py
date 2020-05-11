@@ -108,9 +108,10 @@ def inRange(image, lower, upper):
     return newImage[:,:,0]
 
 
-def hough_transform(image, angles=np.arrange(-90,90,1)):
+def hough_transform(image, angles=np.linspace(-90,90, 181)):
     thetas = np.deg2rad(angles)
-    img_width, img_height = image.shape
+    img_width = image.shape[0]
+    img_height = image.shape[1]
     diagonal = int(np.sqrt(np.square(img_width)+np.square(img_height)))
     rho = np.linspace(-diagonal, diagonal, diagonal*2)
 
@@ -118,14 +119,57 @@ def hough_transform(image, angles=np.arrange(-90,90,1)):
     sines = np.sin(thetas)
     hough_accum = np.zeros((2*diagonal, len(thetas)))
 
-    y_index, x_index = np.nonzero(~image)
-    for i in range(len(y_index)):
+    x_index, y_index = np.nonzero(image)
+    for i in range(len(x_index)):
         x = x_index[i]
         y = y_index[i]
-        for theta in len(thetas):
-            rho_val = diagonal + int(x * cosines[theta] + y * sines[theta])
-            hough_accum[rho_val, thetas[theta]] += 1
-    return hough_accum, thetas, rho
+
+        for theta in range(len(thetas)):
+            rho_val = int(diagonal + int(x * cosines[theta] + y * sines[theta]))
+            hough_accum[rho_val, theta] += 1
+    return hough_accum, angles , rho
 
 def get_hough_lines(accum, thetas, rho):
-    pass
+    maximum_number = np.max(accum)
+    r = 1500
+    least_maximum = maximum_number - (maximum_number*0.2)
+    acc = accum.copy()
+    indices = []
+    while (True):
+        temp_max = np.max(acc)
+        if (temp_max >= least_maximum):
+            index = np.where(acc == temp_max)
+            max_index_row, max_index_col = np.where(acc == temp_max)
+            theta_val = thetas[max_index_col]
+            rho_val = rho[max_index_row]
+
+            x0_val = rho_val*np.cos(theta_val)
+            y0_val = rho_val*np.sin(theta_val)
+            x1_val = x0_val + r * - np.sin(theta_val)
+            y1_val = y0_val + r * np.cos(theta_val)
+            indices.append(((int(x0_val[0]), int(y0_val[0])), (int(x1_val[0]), int(y1_val[0]))))
+
+            acc[max_index_row, max_index_col] = 0
+        else:
+            break
+    return indices
+
+def show_hough_line(img, accumulator, thetas, rhos):
+    import matplotlib.pyplot as plt
+
+    fig, ax = plt.subplots(1, 2, figsize=(10, 10))
+
+    ax[0].imshow(img, cmap=plt.cm.gray)
+    ax[0].set_title('Input image')
+    ax[0].axis('image')
+
+    ax[1].imshow(
+        accumulator, cmap='jet',
+        extent=[np.rad2deg(thetas[-1]), np.rad2deg(thetas[0]), rhos[-1], rhos[0]])
+    ax[1].set_aspect('equal', adjustable='box')
+    ax[1].set_title('Hough transform')
+    ax[1].set_xlabel('Angles (degrees)')
+    ax[1].set_ylabel('Distance (pixels)')
+    ax[1].axis('image')
+
+    plt.show()
