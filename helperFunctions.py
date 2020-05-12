@@ -1,4 +1,5 @@
 import numpy as np
+import  math
 
 def get_gaussian_filter(size, sigma = 1):
     center_x = size[1] / 2
@@ -6,17 +7,34 @@ def get_gaussian_filter(size, sigma = 1):
     gauss = np.zeros(size)
     for i in range(size[0]):
         for j in range(size[1]):
-            gauss[i][j] = (1 / (2 * np.pi * np.square(sigma))) * np, pow(np.exp(), -(
-                        np.square(i - center_y) + np.square(j - center_x)) / 2 * np.square(sigma))
+           # gauss[i,j] = (1 / (2 * np.pi * np.square(sigma))) * pow(np.exp(), -( np.square(i - center_y) + np.square(j - center_x)) / 2 * np.square(sigma))
+           temp1=1/(2*np.pi*sigma*sigma)
+           temp=-( np.square( center_y-i) + np.square( center_x-j) / 2 * np.square(sigma))
+           temp2=np.exp(temp)
 
+           gauss[i][j]=temp1*temp2
     return gauss
 
 def apply_filter(img, kernel):
-    offset = len(kernel) // 2
-    newImage = np.zeros(img.shape())
-    for i in range(offset, img.size[0] - offset):
-        for j in range(offset, img.size[1] - offset):
-            newImage[i, j] = np.dot(img[i-offset:i+offset, j-offset:j+offset], kernel)
+
+    if len(kernel)%2==0:
+        l=len(kernel)
+        offset = len(kernel) // 2
+        newImage = np.zeros(img.shape)
+        for i in range(offset, img.shape[0] - offset):
+            for j in range(offset, img.shape[1] - offset):
+                temp = img[i - offset:i + offset, j - offset:j + offset]
+                newImage[i, j] = sum(sum(np.dot(temp, kernel)))
+    else:
+        offset = int(len(kernel)/ 2)
+        newImage = np.zeros(img.shape)
+        for i in range(offset, img.shape[0] - offset):
+            for j in range(offset, img.shape[1] - offset):
+                temp = img[i - offset:i + offset+1, j - offset:j +offset+1]
+                newImage[i, j] = sum(sum(np.dot(temp, kernel)))
+
+
+
     return newImage
 
 def sobel_filter(img, direction):
@@ -132,7 +150,8 @@ def hough_transform(image, angles=np.linspace(-90,90, 181)):
 def get_hough_lines(accum, thetas, rho):
     maximum_number = np.max(accum)
     r = 1500
-    least_maximum = maximum_number - (maximum_number*0.2)
+    least_maximum = maximum_number - (maximum_number*0.5)
+
     acc = accum.copy()
     indices = []
     while (True):
@@ -142,6 +161,8 @@ def get_hough_lines(accum, thetas, rho):
             max_index_row, max_index_col = np.where(acc == temp_max)
             theta_val = thetas[max_index_col]
             rho_val = rho[max_index_row]
+
+
 
             x0_val = rho_val*np.cos(theta_val)
             y0_val = rho_val*np.sin(theta_val)
@@ -173,3 +194,4 @@ def show_hough_line(img, accumulator, thetas, rhos):
     ax[1].axis('image')
 
     plt.show()
+

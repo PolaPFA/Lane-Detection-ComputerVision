@@ -83,6 +83,7 @@ plt.imshow(hsv_image)
 plt.show()
 #3 convert to Gray
 gray_image = convert_rbg_to_grayscale(image)
+
 #4 Threshold HSV for Yellow and White (combine the two results together)
 #5 Mask the gray image using the threshold output fro step 4
 #6 Apply noise remove (gaussian) to the masked gray image
