@@ -5,6 +5,8 @@ import numpy as np
 import glob
 import math
 from scipy import interpolate
+from skimage import feature
+import cv2
 
 team_members_names = ['بلال هاني كمال', 'بولا فرج أسعد', 'بيتر ماجد منير', 'جورج كميل برسوم', 'جون اميل يوحنا']
 team_members_seatnumbers = ['2016170130', '2016170133', '2016170134', '2016170144', '2016170146']
@@ -80,7 +82,7 @@ def mask_image(img, vertices):
 # main part
 
 # 1 read the image
-image = plt.imread('test1.jpg')
+image = plt.imread('test.jpg')
 print('Original Image')
 plt.imshow(image)
 #plt.show()
@@ -99,31 +101,53 @@ print('White Image')
 plt.imshow(white)
 #plt.show()
 print('Yellow Image')
-plt.imshow(yellow)
+#plt.imshow(yellow)
 #plt.show()
 # 5 Mask the gray image using the threshold output fro step 4
 newgray=(gray_image*white)+(gray_image*yellow)
 
 print('Masked Image')
-plt.imshow(newgray)
+#plt.imshow(newgray)
 #plt.show()
+# 6 Apply noise remove (gaussian) to the masked gray image
+print('Gussian')
+size=newgray.shape
+gauss=helperFunctions.get_gaussian_filter((10,10),1)
+newgray=helperFunctions.apply_filter(newgray,gauss)
+plt.imshow(newgray)
+plt.show()
+# 7 use canny detector and fine tune the thresholds (low and high values)
+print('Edge detection')
+ed1=helperFunctions.sobel_filter(newgray, 0)
+ed2=helperFunctions.sobel_filter(newgray, 1)
+ed=ed1+ed2
+plt.imshow(ed)
+plt.show()
 
+# 8 mask the image using the canny detector output
+print('Mask')
+for i in range( ed.shape[0] ):
+    for j in range(ed.shape[1]):
+        if ed[i][j]!=0:
+            ed[i,j]=1
+newgray=newgray*ed
+# 9 apply hough transform to find the lanes
+
+hough_image=newgray
 print('Hough Image')
-hough_image = yellow+white
+plt.imshow(hough_image)
+plt.show()
+
 hough_accum, thetas, rho = helperFunctions.hough_transform(hough_image)
 lines = helperFunctions.get_hough_lines(hough_accum, thetas, rho)
 #print(lines)
 #print('Done')
-plt.imshow(image)
 for line in lines:
     l1 = line[0]
     l2 = line[1]
-    plt.plot([l1[0],l2[0]], [l2[1],l2[1]])
+    plt.plot([l1[0],l1[1]], [l2[0],l2[1]])
+plt.imshow(image)
 plt.show()
-# 6 Apply noise remove (gaussian) to the masked gray image
-# 7 use canny detector and fine tune the thresholds (low and high values)
-# 8 mask the image using the canny detector output
-# 9 apply hough transform to find the lanes
 # 10 apply the pipeline you developed to the challenge videos
 
 # 11 You should submit your code
