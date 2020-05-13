@@ -145,11 +145,11 @@ def hough_transform(image, angles=np.linspace(-90,90, 181)):
         for theta in range(len(thetas)):
             rho_val = int(diagonal + int(x * cosines[theta] + y * sines[theta]))
             hough_accum[rho_val, theta] += 1
-    return hough_accum, angles , rho
+    return hough_accum, thetas , rho
 
 def get_hough_lines(accum, thetas, rho):
     maximum_number = np.max(accum)
-    r = 1500
+    #r = 1500
     least_maximum = maximum_number - (maximum_number*0.5)
 
     acc = accum.copy()
@@ -157,22 +157,25 @@ def get_hough_lines(accum, thetas, rho):
     while (True):
         temp_max = np.max(acc)
         if (temp_max >= least_maximum):
-            index = np.where(acc == temp_max)
             max_index_row, max_index_col = np.where(acc == temp_max)
-            theta_val = thetas[max_index_col]
-            rho_val = rho[max_index_row]
+            for idx_r, idx_c in zip(max_index_row, max_index_col):
+                theta_val = thetas[idx_c]
+                rho_val = rho[idx_r]
+
+                a = np.cos(theta_val)
+                b = np.sin(theta_val)
+                x0 = a * rho_val
+                y0 = b * rho_val
+                pt1 = (int(x0 + 1000 * (-b)), int(y0 + 1000 * (a)))
+                pt2 = (int(x0 - 1000 * (-b)), int(y0 - 1000 * (a)))
 
 
-
-            x0_val = rho_val*np.cos(theta_val)
-            y0_val = rho_val*np.sin(theta_val)
-            x1_val = x0_val + r * - np.sin(theta_val)
-            y1_val = y0_val + r * np.cos(theta_val)
-            indices.append(((int(x0_val[0]), int(y0_val[0])), (int(x1_val[0]), int(y1_val[0]))))
+                indices.append((pt1,pt2))
 
             acc[max_index_row, max_index_col] = 0
         else:
             break
+    indices = np.array(indices, dtype=int)
     return indices
 
 def show_hough_line(img, accumulator, thetas, rhos):
