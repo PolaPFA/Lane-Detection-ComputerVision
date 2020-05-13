@@ -55,21 +55,21 @@ def non_maxima(img, theta):
             before = 255
             after = 255
             try:
-                if theta[i, j] >= 0 & theta[i, j] < 22.5:
+                if theta[i, j] >= 0 and theta[i, j] < 22.5:
                     before = img[i, j+1]
                     after = img[i, j-1]
-                elif theta[i, j] >= 22.5 & theta[i, j] < 67.5:
+                elif theta[i, j] >= 22.5 and theta[i, j] < 67.5:
                     before = img[i-1, j + 1]
                     after = img[i+1, j - 1]
-                elif theta[i, j] >= 67.5 & theta[i, j] < 112.5:
+                elif theta[i, j] >= 67.5 and theta[i, j] < 112.5:
                     before = img[i - 1, j ]
                     after = img[i + 1, j]
-                elif theta[i, j] >= 112.5 & theta[i, j] < 157.5:
+                elif theta[i, j] >= 112.5 and theta[i, j] < 157.5:
                     before = img[i - 1, j - 1]
                     after = img[i + 1, j + 1]
             except IndexError:
                 continue
-            if before > img[i, j] | after > img[i, j]:
+            if before > img[i, j] or after > img[i, j]:
                 img[i, j] = 0
     return img
 
@@ -86,19 +86,46 @@ def double_threshold(img, low, high):
     return img
 
 def hysteresis_edge_tracking(img):
-    for i in range(img.shape[0]):
-        for j in range(img.shape[1]):
+  '''  offset=1
+    for i in range(offset, img.shape[0] - offset):
+        for j in range(offset, img.shape[1] - offset):
             start_i = np.maximum(0, i-1)
             end_i = np.minimum(255, i+1)
             start_j =  np.maximum(0, j-1)
             end_j = np.minimum(255, j+1)
             mask = np.ones([3,3])
-            outp = np.dot(mask,img[start_i:end_i, start_j:end_j])
+            #temp = img[i - offset:i + offset, j - offset:j + offset]
+            temp = img[start_i:end_i+1, start_j:end_j+1]
+            outp = sum(sum(np.dot(mask,temp)))
             if outp > 255:
                 img[i, j] = 255
             else:
                 img[i,j] = 0
-    return img
+    return img'''
+  WEAK_PIXEL = 50
+  STRONG_PIXEL = 255
+  for i in range(1, img.shape[0] - 1):
+      for j in range(1, img.shape[1] - 1):
+          if img[i, j] == WEAK_PIXEL:
+              neighbors = get_neighbors(img, i, j)
+              has_strong_neighbor = (sum(neighbors == STRONG_PIXEL) != 0)
+              img[i, j] = STRONG_PIXEL if has_strong_neighbor else 0
+  return img
+
+
+def get_neighbors(img, i, j):
+    neighbors = []
+    neighbors.append(img[i + 1, j])
+    neighbors.append(img[i - 1, j])
+    neighbors.append(img[i, j + 1])
+    neighbors.append(img[i, j - 1])
+
+    neighbors.append(img[i + 1, j + 1])
+    neighbors.append(img[i - 1, j - 1])
+    neighbors.append(img[i - 1, j + 1])
+    neighbors.append(img[i + 1, j - 1])
+
+    return np.array(neighbors, dtype=np.int)
 def select_white(image):
     # white color mask
     lower = np.uint8([200  , 0,   190])
@@ -195,3 +222,16 @@ def show_hough_line(img, accumulator, thetas, rhos):
 
     plt.show()
 
+def canny(img):
+    gauss = get_gaussian_filter((20, 20), 3)
+    newimg = apply_filter(img, gauss)
+    ed1 = sobel_filter(newimg, 0)
+    ed2 = sobel_filter(newimg, 1)
+    ed = ed1 + ed2
+    thetas=[0,90,135,45]
+    finaled=0
+
+    finaled+=non_maxima(img, ed)
+    finaled=double_threshold(finaled, 0.3, 0.7)
+    finaled=hysteresis_edge_tracking(finaled)
+    return  finaled

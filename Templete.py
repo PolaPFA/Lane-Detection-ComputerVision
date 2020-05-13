@@ -111,16 +111,15 @@ print('Masked Image')
 #plt.show()
 # 6 Apply noise remove (gaussian) to the masked gray image
 print('Gussian')
-size=newgray.shape
-gauss=helperFunctions.get_gaussian_filter((10,10),1)
+gauss=helperFunctions.get_gaussian_filter((5,5),1)
 newgray=helperFunctions.apply_filter(newgray,gauss)
 plt.imshow(newgray)
 plt.show()
 # 7 use canny detector and fine tune the thresholds (low and high values)
 print('Edge detection')
-ed1=helperFunctions.sobel_filter(newgray, 0)
-ed2=helperFunctions.sobel_filter(newgray, 1)
-ed=ed1+ed2
+#ed1=helperFunctions.sobel_filter(newgray, 0)
+#ed2=helperFunctions.sobel_filter(newgray, 1)
+ed=helperFunctions.canny(newgray)
 plt.imshow(ed)
 plt.show()
 
@@ -140,14 +139,14 @@ plt.show()
 
 hough_accum, thetas, rho = helperFunctions.hough_transform(hough_image)
 lines = helperFunctions.get_hough_lines(hough_accum, thetas, rho)
-#print(lines)
-#print('Done')
+
 for line in lines:
     l1 = line[0]
     l2 = line[1]
     plt.plot([l1[0],l1[1]], [l2[0],l2[1]])
 plt.imshow(image)
 plt.show()
+print('Done')
 # 10 apply the pipeline you developed to the challenge videos
 
 # 11 You should submit your code
