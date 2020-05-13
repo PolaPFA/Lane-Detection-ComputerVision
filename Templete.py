@@ -6,7 +6,8 @@ import glob
 import math
 from scipy import interpolate
 from skimage import feature
-#import cv2
+
+import cv2
 
 team_members_names = ['بلال هاني كمال', 'بولا فرج أسعد', 'بيتر ماجد منير', 'جورج كميل برسوم', 'جون اميل يوحنا']
 team_members_seatnumbers = ['2016170130', '2016170133', '2016170134', '2016170144', '2016170146']
@@ -85,6 +86,7 @@ def mask_image(img, vertices):
 image = plt.imread('test.jpg')
 print('Original Image')
 plt.imshow(image)
+print(image.shape)
 #plt.show()
 # 2 convert to HSV
 hsv_image = convert_rgb_to_hsv(image)
@@ -118,9 +120,10 @@ plt.imshow(newgray)
 plt.show()
 # 7 use canny detector and fine tune the thresholds (low and high values)
 print('Edge detection')
-ed1=helperFunctions.sobel_filter(newgray, 0)
-ed2=helperFunctions.sobel_filter(newgray, 1)
-ed=ed1+ed2
+#ed1=helperFunctions.sobel_filter(newgray, 0)
+#ed2=helperFunctions.sobel_filter(newgray, 1)
+#ed=ed1+ed2
+ed=helperFunctions.canny(newgray)
 plt.imshow(ed)
 plt.show()
 
@@ -142,13 +145,18 @@ hough_accum, thetas, rho = helperFunctions.hough_transform(hough_image)
 lines = helperFunctions.get_hough_lines(hough_accum, thetas, rho)
 #print(lines)
 #print('Done')
-plt.imshow(image)
+count=0
 for line in lines:
     l1 = line[0]
-    l2 = line[1]
-    plt.plot([l1[0],l1[1]], [l2[0],l2[1]])
+    x1=l1[0]
+    y1=l1[1]
 
-plt.show()
+    l2 = line[1]
+    x2=l2[0]
+    y2=l2[1]
+
+    cv2.line(image, (x1, y1), (x2, y2), (255, 0, 0),5)
+cv2.imwrite(str(count)+'.jpg', image)
 # 10 apply the pipeline you developed to the challenge videos
 
 # 11 You should submit your code

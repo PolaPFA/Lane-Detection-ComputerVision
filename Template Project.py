@@ -77,6 +77,7 @@ def mask_image(img, vertices):
 image = plt.imread('test.jpg')
 plt.imshow(image)
 plt.show()
+print(image.shape)
 #2 convert to HSV
 hsv_image = convert_rgb_to_hsv(image)
 plt.imshow(hsv_image)
