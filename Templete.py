@@ -7,7 +7,7 @@ import math
 from scipy import interpolate
 from skimage import feature
 
-import cv2
+#import cv2
 
 team_members_names = ['بلال هاني كمال', 'بولا فرج أسعد', 'بيتر ماجد منير', 'جورج كميل برسوم', 'جون اميل يوحنا']
 team_members_seatnumbers = ['2016170130', '2016170133', '2016170134', '2016170144', '2016170146']
@@ -146,6 +146,7 @@ lines = helperFunctions.get_hough_lines(hough_accum, thetas, rho)
 #print(lines)
 #print('Done')
 count=0
+plt.imshow(image)
 for line in lines:
     l1 = line[0]
     x1=l1[0]
@@ -154,9 +155,10 @@ for line in lines:
     l2 = line[1]
     x2=l2[0]
     y2=l2[1]
-
-    cv2.line(image, (x1, y1), (x2, y2), (255, 0, 0),5)
-cv2.imwrite(str(count)+'.jpg', image)
+    plt.plot((x1,x2), (y1,y2))
+    #cv2.line(image, (x1, y1), (x2, y2), (255, 0, 0),5)
+#cv2.imwrite(str(count)+'.jpg', image)
+plt.show()
 # 10 apply the pipeline you developed to the challenge videos
 
 # 11 You should submit your code
