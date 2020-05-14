@@ -22,11 +22,11 @@ def hough_transform(image, angles=np.linspace(-90,90, 181)):
             hough_accum[rho_val, theta] += 1
     return hough_accum, thetas, rho
 
-def get_hough_lines(accum, thetas, rho):
+def get_hough_lines(accum, thetas, rho, img_size):
     maximum_number = np.max(accum)
     #r = 1500
     least_maximum = maximum_number - (maximum_number*0.1)
-
+    width, height = img_size
     thetas = np.rad2deg(thetas)
     acc = accum.copy()
     indices = []
@@ -42,9 +42,9 @@ def get_hough_lines(accum, thetas, rho):
                 b = np.sin(theta_val)
                 x0 = a * rho_val
                 y0 = b * rho_val
-                pt1 = (abs(int(x0 + 1000 * (-b))), abs(int(y0 + 1000 * (a))))
-                pt2 = (int(x0), int(y0))
-                #pt2 = (int(x0 - 1000 * (-b)), int(y0 - 1000 * (a)))
+                pt2 = (int(x0 + width * (-b)), int(y0 + height * (a)))
+                pt1 = (int(x0), int(y0))
+                #pt2 = (int(x0 - width * (-b)), int(y0 - height * (a)))
 
                 indices.append((pt1,pt2))
 
@@ -75,12 +75,12 @@ def show_hough_line(img, accumulator, thetas, rhos):
     plt.show()
 
 
-image = plt.imread('hough2.jpg')
+image = plt.imread('hough.jpg')
 hough_image = image[:,:,0]
 x_indx, y_indx = np.where(hough_image == 255)
 hough_accum, thetas, rho = hough_transform(hough_image)
 show_hough_line(hough_image, hough_accum, thetas, rho)
-lines = get_hough_lines(hough_accum, thetas, rho)
+lines = get_hough_lines(hough_accum, thetas, rho, hough_image.shape)
 plt.imshow(hough_image)
 for line in lines:
     print(line)
