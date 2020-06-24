@@ -29,8 +29,8 @@ def hough_transform(image, angles=np.linspace(-90,90, 181)):
 def get_hough_lines(accum, thetas, rho, img_size):
     maximum_number = np.max(accum)
     #r = 1500
-    least_maximum = maximum_number - (maximum_number*0.1)
-    height, width = img_size
+    least_maximum = maximum_number - (maximum_number*0.2)
+    width,height = img_size
     #thetas = np.rad2deg(thetas)
     acc = accum.copy()
     indices = []
@@ -40,12 +40,12 @@ def get_hough_lines(accum, thetas, rho, img_size):
             max_index_row, max_index_col = np.where(acc == temp_max)
             for idx_r, idx_c in zip(max_index_row, max_index_col):
                 theta_val = thetas[idx_c]
-                rho_val = rho[idx_r] - (accum.shape[0]/2)
+                rho_val = rho[idx_r]
 
                 a = np.cos(theta_val)
                 b = np.sin(theta_val)
-                x0 = (a * rho_val) + (width/2)
-                y0 = (b * rho_val) + (height/2)
+                x0 = (a * rho_val)
+                y0 = (b * rho_val)
                 pt1 = (int(x0 + 1000 * (-b)), int(y0 + 1000 * (a)))
                 pt2 = (int(x0 - 1000 * (-b)), int(y0 - 1000 * (a)))
                 #pt2 = (int(x0 - width * (-b)), int(y0 - height * (a)))
@@ -78,21 +78,47 @@ def show_hough_line(img, accumulator, thetas, rhos):
     plt.show()
 
 
-image = plt.imread('hough.jpg')
-image = cv2.imread('hough.jpg')
+image = plt.imread('george.jpg')
+image = cv2.imread('george.jpg')
+print(image.shape)
 hough_image = image[:,:,0]
 x_indx, y_indx = np.where(hough_image == 255)
 hough_accum, thetas, rho = hough_transform(hough_image)
 show_hough_line(hough_image, hough_accum, thetas, rho)
 lines = get_hough_lines(hough_accum, thetas, rho, hough_image.shape)
 
-figure = plt.figure(figsize=(10,10))
+#figure = plt.figure(figsize=(10,10))
 
-subfig = figure.add_subplot(1,1,1)
+#subfig = figure.add_subplot(1,1,1)
 
-subfig.imshow(image)
+
+#plt.imshow(image)
 for line in lines:
     x1,y1 = line[0]
     x2,y2 = line[1]
-    subfig.add_line(matline.Line2D([x1,y1],[x2,y2]))
-plt.show()
+    print(line[0])
+    print(line[1])
+ #   cv2.line(image, (y1, x1), (y2, x2), (0, 0, 255), 2)
+#cv2.imshow("test",image)
+
+
+
+print("end")
+
+lines = cv2.HoughLines(hough_image,1,np.pi/180,200)
+for rho,theta in lines[0]:
+    a = np.cos(theta)
+    b = np.sin(theta)
+    x0 = a*rho
+    y0 = b*rho
+    x1 = int(x0 + 1000*(-b))
+    y1 = int(y0 + 1000*(a))
+    x2 = int(x0 - 1000*(-b))
+    y2 = int(y0 - 1000*(a))
+    print((x1,y1))
+    print((x2,y2))
+
+    cv2.line(image,(x1,y1),(x2,y2),(0,0,255),2)
+cv2.imshow("test",image)
+cv2.waitKey(0)
+
