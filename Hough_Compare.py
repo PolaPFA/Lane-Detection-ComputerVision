@@ -1,5 +1,7 @@
 import matplotlib.pyplot as plt
+import matplotlib.lines as matline
 import numpy as np
+import cv2
 
 def hough_transform(image, angles=np.linspace(-90,90, 181)):
     thetas = np.deg2rad(angles)
@@ -19,15 +21,17 @@ def hough_transform(image, angles=np.linspace(-90,90, 181)):
 
         for theta in range(len(thetas)):
             rho_val = int(diagonal + int(x * cosines[theta] + y * sines[theta]))
+
             hough_accum[rho_val, theta] += 1
+
     return hough_accum, thetas, rho
 
 def get_hough_lines(accum, thetas, rho, img_size):
     maximum_number = np.max(accum)
     #r = 1500
     least_maximum = maximum_number - (maximum_number*0.1)
-    width, height = img_size
-    thetas = np.rad2deg(thetas)
+    height, width = img_size
+    #thetas = np.rad2deg(thetas)
     acc = accum.copy()
     indices = []
     while (True):
@@ -36,14 +40,14 @@ def get_hough_lines(accum, thetas, rho, img_size):
             max_index_row, max_index_col = np.where(acc == temp_max)
             for idx_r, idx_c in zip(max_index_row, max_index_col):
                 theta_val = thetas[idx_c]
-                rho_val = rho[idx_r]
+                rho_val = rho[idx_r] - (accum.shape[0]/2)
 
                 a = np.cos(theta_val)
                 b = np.sin(theta_val)
-                x0 = a * rho_val
-                y0 = b * rho_val
-                pt2 = (int(x0 + width * (-b)), int(y0 + height * (a)))
-                pt1 = (int(x0), int(y0))
+                x0 = (a * rho_val) + (width/2)
+                y0 = (b * rho_val) + (height/2)
+                pt1 = (int(x0 + 1000 * (-b)), int(y0 + 1000 * (a)))
+                pt2 = (int(x0 - 1000 * (-b)), int(y0 - 1000 * (a)))
                 #pt2 = (int(x0 - width * (-b)), int(y0 - height * (a)))
 
                 indices.append((pt1,pt2))
@@ -55,9 +59,8 @@ def get_hough_lines(accum, thetas, rho, img_size):
     return indices
 
 def show_hough_line(img, accumulator, thetas, rhos):
-    import matplotlib.pyplot as plt
 
-    fig, ax = plt.subplots(1, 2, figsize=(10, 10))
+    fig, ax = plt.subplots(1, 2, figsize=(20, 10))
 
     ax[0].imshow(img, cmap=plt.cm.gray)
     ax[0].set_title('Input image')
@@ -76,15 +79,20 @@ def show_hough_line(img, accumulator, thetas, rhos):
 
 
 image = plt.imread('hough.jpg')
+image = cv2.imread('hough.jpg')
 hough_image = image[:,:,0]
 x_indx, y_indx = np.where(hough_image == 255)
 hough_accum, thetas, rho = hough_transform(hough_image)
 show_hough_line(hough_image, hough_accum, thetas, rho)
 lines = get_hough_lines(hough_accum, thetas, rho, hough_image.shape)
-plt.imshow(hough_image)
+
+figure = plt.figure(figsize=(10,10))
+
+subfig = figure.add_subplot(1,1,1)
+
+subfig.imshow(image)
 for line in lines:
-    print(line)
-    p1 = line[0]
-    p2 = line[1]
-    plt.plot((p1[1],p2[1]),(p1[0],p2[0]))
+    x1,y1 = line[0]
+    x2,y2 = line[1]
+    subfig.add_line(matline.Line2D([x1,y1],[x2,y2]))
 plt.show()
