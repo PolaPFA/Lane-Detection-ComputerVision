@@ -7,7 +7,7 @@ import numpy as np
 import glob
 import math
 from scipy import interpolate
-from skimage.color import rgb2hsv
+#from skimage.color import rgb2hsv
 
 
 team_members_names = ['بلال هاني كمال', 'بولا فرج أسعد', 'بيتر ماجد منير', 'جورج كميل برسوم', 'جون اميل يوحنا']
@@ -88,16 +88,16 @@ while(cap.isOpened()):
     ret, frame = cap.read()
     if ret == False:
         break
-    #plt.imshow(frame)
-    #plt.show()
+    plt.imshow(frame)
+    plt.show()
     #2 convert to HSV
     hsv_image = convert_rgb_to_hsv(frame)
-    #plt.imshow(hsv_image)
-    #plt.show()
+    plt.imshow(hsv_image)
+    plt.show()
     #3 convert to Gray
     gray_image = convert_rbg_to_grayscale(frame)
-   # plt.imshow(gray_image)
-   # plt.show()
+    plt.imshow(gray_image)
+    plt.show()
 
 
 

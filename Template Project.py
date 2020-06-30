@@ -74,18 +74,41 @@ def mask_image(img, vertices):
 #main part
 
 #1 read the image
-image = plt.imread('test.jpg')
-plt.imshow(image)
-plt.show()
+image = plt.imread('test1.jpg')
+#plt.imshow(image)
+#plt.show()
 print(image.shape)
 #2 convert to HSV
-hsv_image = convert_rgb_to_hsv(image)
-plt.imshow(hsv_image)
-plt.show()
+hsv_image = convert_rgb_to_hsv(image.copy())
+
+
 #3 convert to Gray
 gray_image = convert_rbg_to_grayscale(image)
-
+#plt.imshow(gray_image, cmap='gray')
+#plt.show()
 #4 Threshold HSV for Yellow and White (combine the two results together)
+
+gray_image_thresh = gray_image > 230
+gray_image_thresh[:700,:] = False
+#plt.imshow(gray_image_thresh, cmap='gray')
+#plt.show()
+
+
+hsv_image_copy = hsv_image.copy()
+
+hsv_image_thresh = hsv_image[:,:,2] > 200
+hsv_image_copy[:,:,0] = hsv_image_copy[:,:,0]*hsv_image_thresh
+hsv_image_copy[:,:,1] = hsv_image_copy[:,:,1]*hsv_image_thresh
+hsv_image_copy[:,:,2] = hsv_image_copy[:,:,2]*hsv_image_thresh
+hsv_image_thresh = hsv_image_copy[:,:,1] > 120
+hsv_image_thresh[:,1000:] = False
+#plt.imshow(hsv_image_thresh)
+#plt.show()
+
+final_thresh = hsv_image_thresh + gray_image_thresh
+plt.imshow(final_thresh)
+plt.show()
+
 #5 Mask the gray image using the threshold output fro step 4
 #6 Apply noise remove (gaussian) to the masked gray image
 #7 use canny detector and fine tune the thresholds (low and high values)

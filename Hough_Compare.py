@@ -79,9 +79,10 @@ def show_hough_line(img, accumulator, thetas, rhos):
 
 
 image = plt.imread('george.jpg')
-image = cv2.imread('george.jpg')
+#image = cv2.imread('george.jpg')
 print(image.shape)
-hough_image = image[:,:,0]
+#hough_image = image[:,:,0]
+hough_image = image.copy()
 x_indx, y_indx = np.where(hough_image == 255)
 hough_accum, thetas, rho = hough_transform(hough_image)
 show_hough_line(hough_image, hough_accum, thetas, rho)
@@ -98,27 +99,7 @@ for line in lines:
     x2,y2 = line[1]
     print(line[0])
     print(line[1])
- #   cv2.line(image, (y1, x1), (y2, x2), (0, 0, 255), 2)
-#cv2.imshow("test",image)
-
-
-
-print("end")
-
-lines = cv2.HoughLines(hough_image,1,np.pi/180,200)
-for rho,theta in lines[0]:
-    a = np.cos(theta)
-    b = np.sin(theta)
-    x0 = a*rho
-    y0 = b*rho
-    x1 = int(x0 + 1000*(-b))
-    y1 = int(y0 + 1000*(a))
-    x2 = int(x0 - 1000*(-b))
-    y2 = int(y0 - 1000*(a))
-    print((x1,y1))
-    print((x2,y2))
-
-    cv2.line(image,(x1,y1),(x2,y2),(0,0,255),2)
+    cv2.line(image, (y1, x1), (y2, x2), (0, 0, 255), 2)
 cv2.imshow("test",image)
 cv2.waitKey(0)
 
