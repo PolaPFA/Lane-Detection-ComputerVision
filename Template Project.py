@@ -69,14 +69,34 @@ def mask_image(img, vertices):
                 outside = ~outside
     return img
     #Mask out the pixels outside the region defined in vertices (set the color to black)
+def select_white(image):
+    # white color mask
+    lower = np.uint8([200  , 200,   200])
+    upper = np.uint8([255, 250, 250])
 
+    white_mask = inRange(image, lower, upper)
+
+
+    return white_mask
+def inRange(image, lower, upper):
+
+
+
+    newImage = np.zeros(image.shape )
+    for i in range(image.shape[0]):
+        for j in range(image.shape[1]):
+            temp =image[i,j]
+            if (temp[0]>=lower[0] and temp[0]<=upper[0] )and( temp[1]>=lower[1] and temp[1]<=upper[1]) and(temp[2]>=lower[2]  and temp[2]<=upper[2]):
+                newImage[i,j]=[1,1,1]
+
+    return newImage[:,:,0]
 
 #main part
 
 #1 read the image
 image = plt.imread('test1.jpg')
-#plt.imshow(image)
-#plt.show()
+plt.imshow(image)
+plt.show()
 print(image.shape)
 #2 convert to HSV
 hsv_image = convert_rgb_to_hsv(image.copy())
@@ -93,7 +113,7 @@ gray_image_thresh[:700,:] = False
 #plt.imshow(gray_image_thresh, cmap='gray')
 #plt.show()
 
-
+white_thrsh=select_white(image)
 hsv_image_copy = hsv_image.copy()
 
 hsv_image_thresh = hsv_image[:,:,2] > 200
@@ -104,8 +124,11 @@ hsv_image_thresh = hsv_image_copy[:,:,1] > 120
 hsv_image_thresh[:,1000:] = False
 #plt.imshow(hsv_image_thresh)
 #plt.show()
-
-final_thresh = hsv_image_thresh + gray_image_thresh
+plt.imshow(hsv_image_thresh)
+plt.show()
+plt.imshow(white_thrsh)
+plt.show()
+final_thresh = hsv_image_thresh + white_thrsh
 plt.imshow(final_thresh)
 plt.show()
 
