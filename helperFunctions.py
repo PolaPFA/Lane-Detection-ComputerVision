@@ -62,7 +62,7 @@ def non_maxima(img, theta):
                     before = img[i-1, j + 1]
                     after = img[i+1, j - 1]
                 elif theta[i, j] >= 67.5 and theta[i, j] < 112.5:
-                    before = img[i - 1, j ]
+                    before = img[i - 1, j]
                     after = img[i + 1, j]
                 elif theta[i, j] >= 112.5 and theta[i, j] < 157.5:
                     before = img[i - 1, j - 1]

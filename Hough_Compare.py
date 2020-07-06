@@ -26,11 +26,11 @@ def hough_transform(image, angles=np.linspace(-90,90, 181)):
 
     return hough_accum, thetas, rho
 
-def get_hough_lines(accum, thetas, rho, img_size):
+def get_hough_lines(accum, thetas, rho):
     maximum_number = np.max(accum)
     #r = 1500
-    least_maximum = maximum_number - (maximum_number*0.2)
-    width,height = img_size
+    least_maximum = maximum_number - (maximum_number*0.7)
+
     #thetas = np.rad2deg(thetas)
     acc = accum.copy()
     indices = []
@@ -77,29 +77,4 @@ def show_hough_line(img, accumulator, thetas, rhos):
 
     plt.show()
 
-
-image = plt.imread('george.jpg')
-#image = cv2.imread('george.jpg')
-print(image.shape)
-#hough_image = image[:,:,0]
-hough_image = image.copy()
-x_indx, y_indx = np.where(hough_image == 255)
-hough_accum, thetas, rho = hough_transform(hough_image)
-show_hough_line(hough_image, hough_accum, thetas, rho)
-lines = get_hough_lines(hough_accum, thetas, rho, hough_image.shape)
-
-#figure = plt.figure(figsize=(10,10))
-
-#subfig = figure.add_subplot(1,1,1)
-
-
-#plt.imshow(image)
-for line in lines:
-    x1,y1 = line[0]
-    x2,y2 = line[1]
-    print(line[0])
-    print(line[1])
-    cv2.line(image, (y1, x1), (y2, x2), (0, 0, 255), 2)
-cv2.imshow("test",image)
-cv2.waitKey(0)
 

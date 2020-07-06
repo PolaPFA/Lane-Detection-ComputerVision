@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import helperFunctions
+from Hough_Compare import *
 import matplotlib.image as mpimg
 import numpy as np
 import glob
@@ -44,13 +45,14 @@ def convert_rgb_to_hsv(img):
     #This function will do color transform from RGB to HSV
     
 def detect_edges_canny(img, low_threshold, high_threshold):
-    denoised_image = remove_noise(img, 3)
+    denoised_image = remove_noise(img, (3,3))
     vertical_image = helperFunctions.sobel_filter(denoised_image, 0)
     horizontal_image = helperFunctions.sobel_filter(denoised_image, 1)
     sobeled_image = np.hypot(vertical_image, horizontal_image)
     thetas = np.arctan2(horizontal_image, vertical_image)
     non_maxima_img = helperFunctions.non_maxima(sobeled_image, thetas)
-    return helperFunctions.hysteresis_edge_tracking(non_maxima_img)
+    double_thresh_img = helperFunctions.double_threshold(non_maxima_img, low_threshold, high_threshold)
+    return helperFunctions.hysteresis_edge_tracking(double_thresh_img)
     #You should implement yoru Canny Edge Detector here
 
 def remove_noise(img, kernel_size):
@@ -63,33 +65,12 @@ def mask_image(img, vertices):
     for i in range(vertices.shape[0]):
         outside = True
         for j in range(vertices.shape[1]):
-            if outside & vertices[i, j] == 0:
+            if outside & (vertices[i, j] == 0):
                 img[i, j] == 0
-            elif vertices[i, j] == 255:
+            elif vertices[i, j] == 1:
                 outside = ~outside
     return img
     #Mask out the pixels outside the region defined in vertices (set the color to black)
-def select_white(image):
-    # white color mask
-    lower = np.uint8([200  , 200,   200])
-    upper = np.uint8([255, 250, 250])
-
-    white_mask = inRange(image, lower, upper)
-
-
-    return white_mask
-def inRange(image, lower, upper):
-
-
-
-    newImage = np.zeros(image.shape )
-    for i in range(image.shape[0]):
-        for j in range(image.shape[1]):
-            temp =image[i,j]
-            if (temp[0]>=lower[0] and temp[0]<=upper[0] )and( temp[1]>=lower[1] and temp[1]<=upper[1]) and(temp[2]>=lower[2]  and temp[2]<=upper[2]):
-                newImage[i,j]=[1,1,1]
-
-    return newImage[:,:,0]
 
 #main part
 
@@ -104,16 +85,14 @@ hsv_image = convert_rgb_to_hsv(image.copy())
 
 #3 convert to Gray
 gray_image = convert_rbg_to_grayscale(image)
-#plt.imshow(gray_image, cmap='gray')
-#plt.show()
+
 #4 Threshold HSV for Yellow and White (combine the two results together)
 
-gray_image_thresh = gray_image > 230
-gray_image_thresh[:700,:] = False
-#plt.imshow(gray_image_thresh, cmap='gray')
-#plt.show()
+gray_image_thresh = gray_image > 220
+gray_image_thresh[:300,:] = False
 
-white_thrsh=select_white(image)
+
+
 hsv_image_copy = hsv_image.copy()
 
 hsv_image_thresh = hsv_image[:,:,2] > 200
@@ -122,21 +101,44 @@ hsv_image_copy[:,:,1] = hsv_image_copy[:,:,1]*hsv_image_thresh
 hsv_image_copy[:,:,2] = hsv_image_copy[:,:,2]*hsv_image_thresh
 hsv_image_thresh = hsv_image_copy[:,:,1] > 120
 hsv_image_thresh[:,1000:] = False
-#plt.imshow(hsv_image_thresh)
-#plt.show()
+hsv_image_thresh[:500,:] = False
+
 plt.imshow(hsv_image_thresh)
 plt.show()
-plt.imshow(white_thrsh)
+plt.imshow(gray_image_thresh)
 plt.show()
-final_thresh = hsv_image_thresh + white_thrsh
+final_thresh = hsv_image_thresh + gray_image_thresh
+
 plt.imshow(final_thresh)
 plt.show()
 
+
 #5 Mask the gray image using the threshold output fro step 4
+masked_image = np.multiply(gray_image, final_thresh)
+plt.imshow(masked_image, cmap='gray')
+plt.show()
+
 #6 Apply noise remove (gaussian) to the masked gray image
+
 #7 use canny detector and fine tune the thresholds (low and high values)
+edged = detect_edges_canny(masked_image, 180,220)
+plt.imshow(edged, cmap='gray')
+plt.show()
+
 #8 mask the image using the canny detector output
+edged_image = np.multiply(edged, gray_image)
+plt.imshow(edged_image, cmap='gray')
+plt.show()
 #9 apply hough transform to find the lanes
+hough_accum, thetas, rho = hough_transform(edged_image)
+lanes = get_hough_lines(hough_accum, thetas, rho)
+for lane in lanes:
+    xl1, yl1 = lane[0]
+    xl2, yl2 = lane[1]
+    cv2.line(image, (yl1, xl1), (yl2, xl2), (0, 0, 255), 2)
+cv2.imshow('laned',image)
+cv2.waitKey(0)
+
 #10 apply the pipeline you developed to the challenge videos
 
 #11 You should submit your code
