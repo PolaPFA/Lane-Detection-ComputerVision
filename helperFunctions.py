@@ -1,5 +1,5 @@
 import numpy as np
-import  math
+
 
 def get_gaussian_filter(size, sigma = 1):
     center_x = size[1] / 2
