@@ -1,4 +1,20 @@
 import numpy as np
+import  math
+
+def region_of_interest(image):
+    height = image.shape[0]
+    width = image.shape[1]
+
+    maskl = np.zeros_like(image)
+    maskl[int(height/2):height,0:int(width/2)]=1
+
+    masked_imagel = image* maskl
+
+    maskr = np.zeros_like(image)
+    maskr[int(height / 2):height, int(width / 2):width] = 1
+
+    masked_imager = image * maskr
+    return masked_imagel,masked_imager
 
 
 def get_gaussian_filter(size, sigma = 1):
