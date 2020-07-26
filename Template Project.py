@@ -6,6 +6,7 @@ import numpy as np
 import glob
 import math
 from scipy import interpolate
+from timeit import default_timer as timer
 
 team_members_names = ['بلال هاني كمال', 'بولا فرج أسعد', 'بيتر ماجد منير', 'جورج كميل برسوم', 'جون اميل يوحنا']
 team_members_seatnumbers = ['2016170130', '2016170133', '2016170134', '2016170144', '2016170146']
@@ -72,79 +73,11 @@ def mask_image(img, vertices):
     return img
     #Mask out the pixels outside the region defined in vertices (set the color to black)
 
-#main part
-'''
-#1 read the image
-image = plt.imread('test1.jpg')
-plt.imshow(image)
-plt.show()
-print(image.shape)
-#2 convert to HSV
-hsv_image = convert_rgb_to_hsv(image.copy())
 
-
-#3 convert to Gray
-gray_image = convert_rbg_to_grayscale(image)
-
-#4 Threshold HSV for Yellow and White (combine the two results together)
-
-gray_image_thresh = gray_image > 220
-gray_image_thresh[:300,:] = False
-
-
-
-hsv_image_copy = hsv_image.copy()
-
-hsv_image_thresh = hsv_image[:,:,2] > 200
-hsv_image_copy[:,:,0] = hsv_image_copy[:,:,0]*hsv_image_thresh
-hsv_image_copy[:,:,1] = hsv_image_copy[:,:,1]*hsv_image_thresh
-hsv_image_copy[:,:,2] = hsv_image_copy[:,:,2]*hsv_image_thresh
-hsv_image_thresh = hsv_image_copy[:,:,1] > 120
-hsv_image_thresh[:,1000:] = False
-hsv_image_thresh[:500,:] = False
-
-plt.imshow(hsv_image_thresh)
-plt.show()
-plt.imshow(gray_image_thresh)
-plt.show()
-final_thresh = hsv_image_thresh + gray_image_thresh
-
-plt.imshow(final_thresh)
-plt.show()
-
-
-#5 Mask the gray image using the threshold output fro step 4
-masked_image = np.multiply(gray_image, final_thresh)
-plt.imshow(masked_image, cmap='gray')
-plt.show()
-
-#6 Apply noise remove (gaussian) to the masked gray image
-
-#7 use canny detector and fine tune the thresholds (low and high values)
-edged = detect_edges_canny(masked_image, 180,220)
-plt.imshow(edged, cmap='gray')
-plt.show()
-
-#8 mask the image using the canny detector output
-edged_image = np.multiply(edged, gray_image)
-plt.imshow(edged_image, cmap='gray')
-plt.show()
-#9 apply hough transform to find the lanes
-hough_accum, thetas, rho = hough_transform(edged_image)
-lanes = get_hough_lines(hough_accum, thetas, rho)
-for lane in lanes:
-    xl1, yl1 = lane[0]
-    xl2, yl2 = lane[1]
-    cv2.line(image, (yl1, xl1), (yl2, xl2), (0, 0, 255), 2)
-cv2.imshow('laned',image)
-cv2.waitKey(0)
-'''
 def pipeline(image):
     # 1 read the image
-    #image = plt.imread('test1.jpg')
-    #plt.imshow(image)
-   # plt.show()
-    print(image.shape)
+    #print(image.shape)
+
     # 2 convert to HSV
     hsv_image = convert_rgb_to_hsv(image.copy())
 
@@ -152,7 +85,6 @@ def pipeline(image):
     gray_image = convert_rbg_to_grayscale(image)
 
     # 4 Threshold HSV for Yellow and White (combine the two results together)
-
     gray_image_thresh = gray_image > 220
     gray_image_thresh[:300, :] = False
 
@@ -166,52 +98,43 @@ def pipeline(image):
     hsv_image_thresh[:, 1000:] = False
     hsv_image_thresh[:500, :] = False
 
-    #plt.imshow(hsv_image_thresh)
-    #plt.show()
-    #plt.imshow(gray_image_thresh)
-    #plt.show()
     final_thresh = hsv_image_thresh + gray_image_thresh
-
-    #plt.imshow(final_thresh)
-    #plt.show()
 
     # 5 Mask the gray image using the threshold output fro step 4
     masked_image = np.multiply(gray_image, final_thresh)
-    #plt.imshow(masked_image, cmap='gray')
-    #plt.show()
 
     # 6 Apply noise remove (gaussian) to the masked gray image
+    # Gaussian filter is already implemented inside canny as it is a major step in it
 
     # 7 use canny detector and fine tune the thresholds (low and high values)
     edged = detect_edges_canny(masked_image, 180, 220)
-   # plt.imshow(edged, cmap='gray')
-   # plt.show()
 
     # 8 mask the image using the canny detector output
     edged_image = np.multiply(edged, gray_image)
-    #plt.imshow(edged_image, cmap='gray')
-    #plt.show()
+
     # 9 apply hough transform to find the lanes
-    edged_image_1 , edged_image_2= helperFunctions.region_of_interest(edged_image)
+    edged_image_1, edged_image_2 = helperFunctions.region_of_interest(edged_image)
     hough_accum, thetas, rho = hough_transform(edged_image_1)
     lanes = get_hough_lines(hough_accum, thetas, rho)
-    for lane in lanes:
-        xl1, yl1 = lane[0]
-        xl2, yl2 = lane[1]
-        cv2.line(image, (yl1, xl1), (yl2, xl2), (0, 0, 255), 2)
+    #for lane in lanes:
+    xl1, yl1 = lanes[0,0]
+    xl2, yl2 = lanes[0,1]
+    cv2.line(image, (yl1, xl1), (yl2, xl2), (0, 0, 255), 2)
     hough_accum, thetas, rho = hough_transform(edged_image_2)
     lanes = get_hough_lines(hough_accum, thetas, rho)
-    for lane in lanes:
-        xl1, yl1 = lane[0]
-        xl2, yl2 = lane[1]
-        cv2.line(image, (yl1, xl1), (yl2, xl2), (0, 0, 255), 2)
+
+    #for lane in lanes:
+    xl1, yl1 = lanes[0,0]
+    xl2, yl2 = lanes[0,1]
+    cv2.line(image, (yl1, xl1), (yl2, xl2), (0, 0, 255), 2)
+
     return image
 #10 apply the pipeline you developed to the challenge videos
 cap= cv2.VideoCapture('White Lane.mp4')
 fps = cap.get(cv2.CAP_PROP_FPS)
 print(fps)
-outimg=[]
-i=1
+outimg = []
+i = 1
 
 while(cap.isOpened()):
     ret, frame = cap.read()
@@ -224,15 +147,14 @@ while(cap.isOpened()):
     print(i)
     i += 1
 #11 You should submit your code
-fourcc = cv2.VideoWriter_fourcc('X','V','I','D')
+fourcc = cv2.VideoWriter_fourcc('X', 'V', 'I', 'D')
 
 
 video_filename = 'WhiteLaneout.avi'
-#out = cv2.VideoWriter(video_filename, fourcc, int(fps), width, height)
-out = cv2.VideoWriter(video_filename,fourcc,fps,(width,height),True)
+
+out = cv2.VideoWriter(video_filename, fourcc, fps, (width, height), True)
 
 for img in outimg:
-        #add this array to the video
     out.write(img)
     cv2.waitKey(1)
 cap.release()
