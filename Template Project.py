@@ -139,7 +139,7 @@ for lane in lanes:
 cv2.imshow('laned',image)
 cv2.waitKey(0)
 '''
-def pipline(image):
+def pipeline(image):
     # 1 read the image
     #image = plt.imread('test1.jpg')
     #plt.imshow(image)
@@ -217,7 +217,7 @@ while(cap.isOpened()):
     ret, frame = cap.read()
     if ret == False:
         break
-    frame=pipline(frame)
+    frame = pipeline(frame)
     height, width, layers = frame.shape
     size = (width, height)
     outimg.append(frame)
